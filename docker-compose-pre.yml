@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: prosthetic-db
+    restart: always
+    environment:
+      POSTGRES_USER: prosthetic_user
+      POSTGRES_PASSWORD: prosthetic_user_123
+      POSTGRES_DB: prosthetic_api
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - prosthetic-net
+
+  backend-pre:
+    build:
+      context: ../api/prosthetic-api
+    image: prosthetic-backend-pre:latest  # 🆕 Taggeamos imagen
+    container_name: prosthetic-backend-pre
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - ../api/prosthetic-api/.env.pre
+    ports:
+      - "3100:3000"
+    networks:
+      - prosthetic-net
+
+  frontend-pre:
+    build:
+      context: ../front/prosthetic-front
+      args:
+        ENV_FILE: .env.pre
+    image: prosthetic-frontend-pre:latest  # 🆕 Taggeamos imagen
+    container_name: prosthetic-frontend-pre
+    restart: always
+    depends_on:
+      - backend-pre
+    env_file:
+      - ../front/prosthetic-front/.env.pre
+    ports:
+      - "8180:80"
+    networks:
+      - prosthetic-net
+
+volumes:
+  db-data:
+
+networks:
+  prosthetic-net:
