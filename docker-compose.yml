@@ -25,8 +25,9 @@ services:
   backend:
     build:
       context: ../api/prosthetic-api
+    image: prosthetic-backend:latest  # 🆕
     container_name: prosthetic-backend
-    restart: unless-stopped
+    restart: always
     depends_on:
       - db
     env_file:
@@ -37,19 +38,22 @@ services:
       - prosthetic-net
 
   # --------------------
-  # Backend Preproducción
+  # Frontend Producción
   # --------------------
-  backend-pre:
+  frontend:
     build:
-      context: ../api/prosthetic-api
-    container_name: prosthetic-backend-pre
-    restart: unless-stopped
+      context: ../front/prosthetic-front
+      args:
+        ENV_FILE: .env
+    image: prosthetic-frontend:latest  # 🆕
+    container_name: prosthetic-frontend
+    restart: always
     depends_on:
-      - db
+      - backend
     env_file:
-      - ../api/prosthetic-api/.env.pre
+      - ../front/prosthetic-front/.env
     ports:
-      - "3100:3000"
+      - "8080:80"
     networks:
       - prosthetic-net
 
